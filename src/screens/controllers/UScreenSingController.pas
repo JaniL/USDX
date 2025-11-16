@@ -195,6 +195,7 @@ const
 implementation
 
 uses
+  UMain,
   UDatabase,
   UDisplay,
   UDLLManager,
@@ -208,6 +209,7 @@ uses
   UParty,
   UPathUtils,
   USong,
+  USongQueue,
   UUnicodeUtils,
   UWebcam,
   UWebSDK,
@@ -1005,6 +1007,7 @@ var
   BgFile:     IPath;
   success:    boolean;
   AudioEnd:   real;
+  // NextSong: TSongQueueItem;
 
 begin
   // background texture (garbage disposal)
@@ -1036,6 +1039,14 @@ begin
 
   PlaylistMedley.ApplausePlayed := false;
 
+  // NextSong := SongQueue.GetNextSong();
+
+  //if Assigned(NextSong) then
+  //begin
+  //  CatSongs.Selected := NextSong.SongID;
+  //  NextSong.Free;
+  //end
+  //else
   if ScreenSong.Mode = smMedley then
   begin
     if length(PlaylistMedley.Song) >= PlaylistMedley.CurrentMedleySong then

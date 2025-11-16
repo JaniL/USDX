@@ -232,6 +232,8 @@ uses
   USkins,
   USong,
   UTime,
+  UMain,
+  USongQueue,
   UUnicodeUtils;
 
 {
@@ -401,6 +403,12 @@ begin
          begin
            if (FinishScreenDraw = true) then
            begin
+
+            if not SongQueue.IsEmpty then
+            begin
+              FadeTo(@ScreenSong);
+              Exit;
+            end;
 
              if (CurrentSong.isDuet) or (ScreenSong.RapToFreestyle) or (ScreenSong.Mode = smMedley) then
                FadeTo(@ScreenSong)

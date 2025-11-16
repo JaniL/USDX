@@ -28,7 +28,7 @@ unit UWebServer;
 interface
 
 uses
-  Classes, SysUtils, fphttpserver, httproute, HTTPDefs, USongs, USong, UPlatform, UPath, fpjson, jsonparser, UDisplay, UNote, UGraphic;
+  Classes, SysUtils, Contnrs, fphttpserver, httproute, HTTPDefs, USongs, USong, UPlatform, UPath, fpjson, jsonparser, UDisplay, UNote, UGraphic, USongQueue, UMain;
 
 type
   TWebServer = class(TThread)
@@ -43,6 +43,8 @@ type
     procedure routeSongList(ARequest: TRequest; AResponse: TResponse);
     procedure routeSongsJSON(ARequest: TRequest; AResponse: TResponse);
     procedure routeCurrentSongJSON(ARequest: TRequest; AResponse: TResponse);
+    procedure routeSongQueueJSON(ARequest: TRequest; AResponse: TResponse);
+    procedure routeAddSongToQueue(ARequest: TRequest; AResponse: TResponse);
     procedure routeFile(ARequest: TRequest; AResponse: TResponse);
     procedure routeSongFile(ARequest: TRequest; AResponse: TResponse);
     procedure route404(ARequest: TRequest; AResponse: TResponse);
@@ -50,6 +52,7 @@ type
     function GenerateHTMLWithSongs: string;
     function GenerateJSONWithSongs: string;
     function GenerateJSONWithCurrentSong: string;
+    function GenerateJSONWithSongQueue: string;
     function LoadTemplate: string;
   public
     constructor Create(APort: Integer);
@@ -97,6 +100,69 @@ begin
   AResponse.Code := 200;
 end;
 
+procedure TWebServer.routeSongQueueJSON(ARequest: TRequest; AResponse: TResponse);
+var ResponseJSON: String;
+begin
+  AResponse.ContentType := 'application/json; charset=UTF-8';
+  ResponseJSON := GenerateJSONWithSongQueue;
+  AResponse.Content := ResponseJSON;
+  AResponse.Code := 200;
+end;
+
+procedure TWebServer.routeAddSongToQueue(ARequest: TRequest; AResponse: TResponse);
+var
+  SongID: Integer;
+  PlayerName: string;
+  ResponseJSON: TJSONObject;
+  RequestJSON: TJSONData;
+  Parser: TJSONParser;
+begin
+  ResponseJSON := TJSONObject.Create;
+  Parser := nil;
+  RequestJSON := nil;
+  try
+    try
+      if ARequest.Content = '' then
+        raise Exception.Create('Request body is empty.');
+
+      Parser := TJSONParser.Create(ARequest.Content);
+      RequestJSON := Parser.Parse;
+      if not (RequestJSON is TJSONObject) then
+        raise Exception.Create('Invalid JSON format: expected a JSON object.');
+
+      SongID := TJSONObject(RequestJSON).Get('songId', -1);
+      PlayerName := TJSONObject(RequestJSON).Get('playerName', '');
+
+      if (SongID >= 0) and (SongID < Songs.SongList.Count) then
+      begin
+        SongQueue.AddSong(SongID, PlayerName);
+        ResponseJSON.Add('status', 'success');
+        ResponseJSON.Add('message', 'Song added to queue.');
+        AResponse.Code := 200;
+      end
+      else
+      begin
+        ResponseJSON.Add('status', 'error');
+        ResponseJSON.Add('message', 'Invalid Song ID.');
+        AResponse.Code := 400;
+      end;
+    except
+      on E: Exception do
+      begin
+        ResponseJSON.Add('status', 'error');
+        ResponseJSON.Add('message', 'Invalid request: ' + E.Message);
+        AResponse.Code := 400;
+      end;
+    end;
+  finally
+    AResponse.ContentType := 'application/json; charset=UTF-8';
+    AResponse.Content := ResponseJSON.AsJSON;
+    ResponseJSON.Free;
+    RequestJSON.Free;
+    Parser.Free;
+  end;
+end;
+
 procedure TWebServer.route404(ARequest: TRequest; AResponse: TResponse);
 begin
   if THTTPRouter.StringToRouteMethod(ARequest.Method) = rmGET then
@@ -125,7 +191,7 @@ begin
 
   try
     try
-      WebFilePath := Platform.GetGameUserPath.Append('resources\web\').Append(FileName);
+      WebFilePath := Platform.GetGameUserPath.Append('resources\web').Append(FileName);
       FileStream := TFileStream.Create(WebFilePath.ToNative, fmOpenRead or fmShareDenyWrite);
 
       AResponse.ContentType := ContentTypeForExt(WebFilePath.GetExtension);
@@ -205,6 +271,8 @@ begin
   FRouter.RegisterRoute('/theme.js', rmGET, @routeFile);
   FRouter.RegisterRoute('/currentSong.json', rmGET, @routeCurrentSongJSON);
   FRouter.RegisterRoute('/songs.json', rmGET, @routeSongsJSON);
+  FRouter.RegisterRoute('/song-queue.json', rmGET, @routeSongQueueJSON);
+  FRouter.RegisterRoute('/song-queue/add', rmPOST, @routeAddSongToQueue);
   FRouter.RegisterRoute('/jquery.min.js', rmGET, @routeFile);
   FRouter.RegisterRoute('/jquery.min.map', rmGET, @routeFile);
   FRouter.RegisterRoute('/datatables.min.js', rmGET, @routeFile);
@@ -361,6 +429,43 @@ begin
   end;
   Result := JSONRoot.AsJSON;
 end;
+
+function TWebServer.GenerateJSONWithSongQueue: string;
+var
+  I: Integer;
+  Song: TSong;
+  QueueItem: TSongQueueItem;
+  JSONRoot, Item: TJSONObject;
+  JSONQueue: TJSONArray;
+  SongQueueCopy: TObjectList;
+begin
+  JSONRoot := TJSONObject.Create;
+  JSONQueue := TJSONArray.Create;
+  JSONRoot.Add('queue', JSONQueue);
+
+  SongQueueCopy := SongQueue.GetQueueCopy;
+  try
+    for I := 0 to SongQueueCopy.Count - 1 do
+    begin
+      QueueItem := TSongQueueItem(SongQueueCopy[I]);
+      if (QueueItem.SongID >= 0) and (QueueItem.SongID < Songs.SongList.Count) then
+      begin
+        Song := TSong(Songs.SongList[QueueItem.SongID]);
+        Item := TJSONObject.Create;
+        Item.Add('songId', QueueItem.SongID);
+        Item.Add('artist', UTF8Encode(Song.Artist));
+        Item.Add('title', UTF8Encode(Song.Title));
+        Item.Add('playerName', QueueItem.PlayerName);
+        JSONQueue.Add(Item);
+      end;
+    end;
+  finally
+    SongQueueCopy.Free;
+  end;
+
+  Result := JSONRoot.AsJSON;
+end;
+
 
 function TWebServer.ContentTypeForExt(Ext: IPath): string;
 begin

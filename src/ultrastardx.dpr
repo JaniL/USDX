@@ -238,6 +238,7 @@ uses
 {$ELSEIF Defined(UNIX)}
   UPlatformLinux    in 'base\UPlatformLinux.pas',
 {$IFEND}
+  USongQueue        in 'base\USongQueue.pas',
 
   //------------------------------
   //Includes - Media

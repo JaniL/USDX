@@ -332,6 +332,7 @@ uses
   UHelp,
   ULog,
   UMain,
+  USongQueue,
   UMenuButton,
   UMenuStatic,
   UNote,
@@ -3212,6 +3213,8 @@ begin
 end;
 
 procedure TScreenSong.OnShowFinish;
+var
+  NextSong: TSongQueueItem;
 begin
   DuetChange := false;
   RapToFreestyle := false;
@@ -3223,6 +3226,13 @@ begin
 
   //if (Mode = smPartyTournament) then
   //  PartyTime := SDL_GetTicks();
+
+  if not SongQueue.IsEmpty then
+  begin
+    NextSong := SongQueue.GetNextSong();
+    ScreenSong.SkipTo(NextSong.SongID);
+    ScreenSong.StartSong;
+  end;
 
 end;
 

@@ -35,11 +35,13 @@ interface
 
 uses
   SysUtils,
-  SDL2;
+  SDL2,
+  USongQueue;
 
 var
   CheckMouseButton: boolean; // for checking mouse motion
   MAX_FPS: Byte; // 0 to 255 is enough
+  SongQueue: TSongQueue; // Added song queue variable
 
 
 procedure Main;
@@ -103,13 +105,13 @@ uses
   UTime,
   UWebcam,
   UWebServer;
-  //UVideoAcinerella;
 
 procedure Main;
 var
   WindowTitle: string;
   BadPlayer: integer;
   Server: TWebServer;
+  //SongQueue: TSongQueue; // Added song queue variable
 
 begin
   {$IFNDEF Debug}
@@ -211,6 +213,9 @@ begin
     Log.LogStatus('Playlist Manager', 'Initialization');
     PlaylistMan := TPlaylistManager.Create;
 
+    Log.LogStatus('Song Queue', 'Initialization');
+    SongQueue := TSongQueue.Create;
+
     // GoldenStarsTwinkleMod
     Log.LogStatus('Effect Manager', 'Initialization');
     GoldenRec := TEffectManager.Create;
@@ -295,6 +300,9 @@ begin
     begin
          DataBase.Destroy();
     end;
+
+    if (SongQueue <> nil) then
+      SongQueue.Free;
 
     Log.LogStatus('Finalize Media', 'Finalization');
     FinalizeMedia();
