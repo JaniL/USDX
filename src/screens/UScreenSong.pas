@@ -3230,8 +3230,10 @@ begin
   if not SongQueue.IsEmpty then
   begin
     NextSong := SongQueue.GetNextSong();
+    WriteMessage('Next up: ' + NextSong.PlayerName);
     ScreenSong.SkipTo(NextSong.SongID);
-    ScreenSong.StartSong;
+    // SDL_Delay(3000);
+    // ScreenSong.StartSong;
   end;
 
 end;
