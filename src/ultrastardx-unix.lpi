@@ -29,7 +29,11 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
+<<<<<<< HEAD
     <Units Count="124">
+=======
+    <Units Count="125">
+>>>>>>> 04eb188c (Revert ultrastardx-unix)
       <Unit0>
         <Filename Value="ultrastardx.dpr"/>
         <IsPartOfProject Value="True"/>
@@ -504,7 +508,11 @@
       <Unit119>
         <Filename Value="lua/ULuaRenderer.pas"/>
         <IsPartOfProject Value="True"/>
+<<<<<<< HEAD
         <UnitName Value="ULuaRenderer"/>
+=======
+        <UnitName Value="ULuaGl"/>
+>>>>>>> 04eb188c (Revert ultrastardx-unix)
       </Unit119>
       <Unit120>
         <Filename Value="lua/ULuaLog.pas"/>
@@ -524,13 +532,18 @@
       <Unit123>
         <Filename Value="lua/ULuaText.pas"/>
         <IsPartOfProject Value="True"/>
+<<<<<<< HEAD
         <UnitName Value="ULuaText"/>
+=======
+        <UnitName Value="ULuaTextGL"/>
+>>>>>>> 04eb188c (Revert ultrastardx-unix)
       </Unit123>
       <Unit124>
         <Filename Value="lua/ULuaTexture.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ULuaTexture"/>
       </Unit124>
+<<<<<<< HEAD
       <Unit125>
         <Filename Value="menu/UMenuWidget.pas"/>
         <IsPartOfProject Value="True"/>
@@ -541,6 +554,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="UWebServer"/>
       </Unit126>
+=======
+>>>>>>> 04eb188c (Revert ultrastardx-unix)
     </Units>
   </ProjectOptions>
   <CompilerOptions>
