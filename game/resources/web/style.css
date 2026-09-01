@@ -3,45 +3,79 @@
     --text-color: #121212;
     --bkg-color: #fff;
     --accent-color: #add8e6;
+    --stripe-color: #f2f2f2;
+    --hover-color: #e8e8e8;
 }
 /* Dark theme colors */
 [data-theme="dark"] {
     --text-color: #fff;
     --bkg-color: #181a1b;
     --accent-color: rgb(27, 73, 88);
+    --stripe-color: #1e2123;
+    --hover-color: #26292b;
 }
 
 body {
     font-family: Arial, sans-serif;
     background: var(--bkg-color);
     color: var(--text-color);
+    margin: 16px;
+}
+
+#search {
+    margin-bottom: 12px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bkg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+}
+
+#songCount {
+    margin: 4px 0;
+    font-size: 0.9em;
 }
 
 table {
-    width: 100% !important;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
+
+.col-artist  { width: 25%; }
+.col-title   { width: 30%; }
+.col-edition { width: 20%; }
+.col-genre   { width: 15%; }
+.col-year    { width: 10%; }
 
 th, td {
     padding: 8px;
     text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-th {
+thead th {
     background-color: var(--accent-color);
+    position: sticky;
+    top: 0;
+    cursor: pointer;
+    user-select: none;
 }
 
-input {
-    margin-bottom: 12px;
-    padding: 8px;
-    width: 100%;
-}
+th.sort-asc::after  { content: " \25B2"; }
+th.sort-desc::after { content: " \25BC"; }
+
+tbody tr:nth-child(even) { background-color: var(--stripe-color); }
+tbody tr:hover           { background-color: var(--hover-color); }
 
 .controls {
     position: absolute;
     top: 12px;
     right: 10px;
 }
-
 
 /* Toggle Switch */
 /* inspired by:
@@ -68,12 +102,12 @@ input {
         border-radius: calc(var(--switch-height)/2);
         cursor: pointer;
     }
-    
+
     input {
         position: absolute;
         display: none;
     }
-    
+
     .slider {
         position: absolute;
         width: 100%;
@@ -81,11 +115,11 @@ input {
         border-radius: calc(var(--switch-height)/2);
         transition: 0.3s;
     }
-    
+
     input:checked ~ .slider {
         background-color: var(--switch-light);
     }
-    
+
     .slider::before {
         content: "";
         position: absolute;
@@ -98,7 +132,7 @@ input {
         background-color: var(--switch-dark);
         transition: 0.3s;
     }
-    
+
     input:checked ~ .slider::before {
         transform: translateX(calc(var(--switch-height)*0.95));
         background-color: var(--switch-dark);
